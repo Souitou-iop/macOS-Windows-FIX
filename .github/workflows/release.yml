@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build app bundle
+        run: ./script/build_app.sh
+        env:
+          CONFIGURATION: release
+
+      - name: Archive app bundle
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [[ "${GITHUB_REF_TYPE}" != "tag" ]]; then
+            VERSION="manual-${GITHUB_SHA::7}"
+          fi
+          ZIP_NAME="MacFocusFix-${VERSION}-macOS.zip"
+          ditto -c -k --sequesterRsrc --keepParent dist/MacFocusFix.app "dist/${ZIP_NAME}"
+          echo "ZIP_NAME=${ZIP_NAME}" >> "$GITHUB_ENV"
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MacFocusFix-macOS
+          path: dist/*.zip
+
+      - name: Publish GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          repository: Souitou-iop/macOS-Windows-FIX
+          files: dist/${{ env.ZIP_NAME }}
+          generate_release_notes: true
