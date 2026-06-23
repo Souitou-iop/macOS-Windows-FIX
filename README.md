@@ -18,11 +18,15 @@
   <a href="https://github.com/Souitou-iop/macOS-Windows-FIX/issues">Feedback</a>
 </p>
 
-## Why
+## Why I Built This
 
-Some remote-control apps can click the right macOS window without making that app the real foreground app. The result is awkward: the click lands where you expect, but keyboard input still goes to the previous app.
+After updating to macOS 27, I started seeing a strange remote-control focus bug with tools such as UU Remote. A remote click could still reach the right window control, so buttons and fields looked like they were being clicked. But macOS did not always switch the real foreground app: the app name next to the Apple menu stayed on the previous app, and keyboard input kept going there.
 
-MacFocusFix listens for mouse clicks, finds the app under the pointer, and activates it so typing follows the click.
+The clearest workaround was to click the target window's title bar first. That forced macOS to activate the window, but it broke the natural remote-control flow: every time I wanted to type into another app, I had to remember to click the frame instead of the content.
+
+The first round of debugging pointed away from a normal app setting issue. Accessibility permissions, UI restarts, and remote-control settings were useful things to check, but the symptom looked deeper: the mouse event arrived, while the WindowServer / Accessibility foreground-app activation step did not. Apple's own remote-control stack also appeared to be changing around newer macOS input and Accessibility behavior, which made this feel like a third-party remote-input compatibility gap rather than a single text-field bug.
+
+MacFocusFix is the small local workaround that came out of that investigation. It does not replace the remote-control app. It simply runs on the Mac being controlled, listens for mouse clicks, finds the app under the pointer, and explicitly activates it so keyboard focus follows the click again.
 
 ## Features
 
