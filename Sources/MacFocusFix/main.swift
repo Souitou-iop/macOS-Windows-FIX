@@ -262,6 +262,7 @@ private final class FocusController {
         let window = focusedWindowCandidate(from: element)
 
         if let window {
+            AXUIElementPerformAction(window, kAXRaiseAction as CFString)
             AXUIElementSetAttributeValue(window, kAXMainAttribute as CFString, kCFBooleanTrue)
             AXUIElementSetAttributeValue(window, kAXFocusedAttribute as CFString, kCFBooleanTrue)
             AXUIElementSetAttributeValue(appElement, kAXFocusedWindowAttribute as CFString, window)

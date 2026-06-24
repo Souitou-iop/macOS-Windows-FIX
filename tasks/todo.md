@@ -193,3 +193,18 @@
 - Added ignored system UI bundle identifiers for Notification Center, Spotlight, Siri, and Screenshot, while keeping the existing menu bar, Control Center, Dock, and input menu filters.
 - Added a localized Launch at Login menu item using `SMAppService.mainApp`.
 - Verified `plutil -lint`, `swift build`, `APP_ARCH=arm64 CONFIGURATION=release ./script/build_app.sh`, `APP_ARCH=x86_64 CONFIGURATION=release ./script/build_app.sh`, `lipo -info`, `codesign --verify --deep --strict`, packaged resources, and `./script/build_and_run.sh --verify`.
+
+## Covered Window Raise Fix Plan
+
+- [x] Raise the clicked window when focus is redirected to a covered app.
+  - Verify: activation path performs the AX raise action on the target window.
+- [x] Keep keyboard focus transfer behavior intact.
+  - Verify: app still sets main/focused window and foreground app activation.
+- [x] Build and package the app.
+  - Verify: `swift build` and `./script/build_app.sh` succeed.
+
+## Covered Window Raise Fix Review
+
+- Added `kAXRaiseAction` on the target AX window before setting main/focused window attributes.
+- Kept foreground app activation and did not reintroduce synthetic reclick behavior.
+- Verified `swift build` and `./script/build_app.sh`.
