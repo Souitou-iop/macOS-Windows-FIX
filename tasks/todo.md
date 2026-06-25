@@ -193,3 +193,18 @@
 - Added ignored system UI bundle identifiers for Notification Center, Spotlight, Siri, and Screenshot, while keeping the existing menu bar, Control Center, Dock, and input menu filters.
 - Added a localized Launch at Login menu item using `SMAppService.mainApp`.
 - Verified `plutil -lint`, `swift build`, `APP_ARCH=arm64 CONFIGURATION=release ./script/build_app.sh`, `APP_ARCH=x86_64 CONFIGURATION=release ./script/build_app.sh`, `lipo -info`, `codesign --verify --deep --strict`, packaged resources, and `./script/build_and_run.sh --verify`.
+
+## SwiftPM Resource Bundle Packaging Fix Plan
+
+- [x] Replace direct `Bundle.module` usage with app-bundle-aware resource lookup.
+  - Verify: resources are loaded from `Contents/Resources/MacFocusFix_MacFocusFix.bundle`.
+- [x] Keep the app bundle in standard macOS layout.
+  - Verify: codesign verification succeeds with the resource bundle under `Contents/Resources`.
+- [x] Verify the zipped Release-style app can actually start.
+  - Verify: unzip the archive and launch the `.app` without the SwiftPM resource bundle fatal error.
+
+## SwiftPM Resource Bundle Packaging Fix Review
+
+- Replaced `Bundle.module` calls with an app-bundle-aware resource lookup that finds `MacFocusFix_MacFocusFix.bundle` under `Contents/Resources`.
+- Kept the bundle in the standard macOS app resource location so codesign verification succeeds.
+- Verified `swift build`, `./script/build_app.sh`, arm64 release packaging, zip/unzip, and launching the unzipped `.app`.

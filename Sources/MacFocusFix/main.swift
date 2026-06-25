@@ -18,13 +18,53 @@ private let ignoredSystemUIBundleIdentifiers: Set<String> = [
     "com.apple.screenshot.launcher"
 ]
 
+private enum AppResources {
+    private static let bundleName = "MacFocusFix_MacFocusFix.bundle"
+
+    static let bundle: Bundle = {
+        let candidates = resourceBundleCandidates()
+
+        for candidate in candidates {
+            let bundleURL = candidate.appendingPathComponent(bundleName)
+            if let bundle = Bundle(url: bundleURL) {
+                return bundle
+            }
+        }
+
+        return .main
+    }()
+
+    private static func resourceBundleCandidates() -> [URL] {
+        var candidates: [URL] = []
+
+        if let override = ProcessInfo.processInfo.environment["PACKAGE_RESOURCE_BUNDLE_PATH"]
+            ?? ProcessInfo.processInfo.environment["PACKAGE_RESOURCE_BUNDLE_URL"] {
+            candidates.append(URL(fileURLWithPath: override))
+        }
+
+        if let resourceURL = Bundle.main.resourceURL {
+            candidates.append(resourceURL)
+        }
+
+        if let executableURL = Bundle.main.executableURL {
+            let contentsURL = executableURL
+                .deletingLastPathComponent()
+                .deletingLastPathComponent()
+            candidates.append(contentsURL.appendingPathComponent("Resources"))
+        }
+
+        candidates.append(Bundle.main.bundleURL)
+        return candidates
+    }
+}
+
 private enum L10n {
     private static let bundle: Bundle = {
         let localization = preferredLocalization()
 
-        guard let path = Bundle.module.path(forResource: localization, ofType: "lproj"),
+        guard let path = AppResources.bundle.path(forResource: localization, ofType: "lproj"),
               let bundle = Bundle(path: path) else {
-            return .module
+            return AppResources.bundle
         }
 
         return bundle
@@ -461,7 +501,7 @@ private final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     private func statusIconImage() -> NSImage? {
-        guard let url = Bundle.module.url(forResource: "MenuBarIcon", withExtension: "svg") else {
+        guard let url = AppResources.bundle.url(forResource: "MenuBarIcon", withExtension: "svg") else {
             return nil
         }
 
